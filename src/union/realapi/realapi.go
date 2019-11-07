@@ -31,6 +31,8 @@ func main() {
 	apnRouter.Post("/media/getAll", (*api.Apn).GetAllMeida)
 	apnRouter.Post("/media/add", (*api.Apn).AddOneMeida)
 
+	apnRouter.Post("/checkCookie", (*api.Apn).CheckCookie)
+
 
 	//***********
 	//**api******

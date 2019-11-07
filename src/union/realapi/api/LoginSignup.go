@@ -1,23 +1,23 @@
 package api
 
 import (
-	"union/realapi/data/user"
-	"union/realapi/packet"
 	"encoding/base64"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"time"
+	"union/realapi/data/user"
+	"union/realapi/packet"
 
 	"union/realapi/security"
 
-	"union/realapi/data/session"
 	log "github.com/alecthomas/log4go"
 	"github.com/gocraft/web"
 	"tantanbei.com/token"
 	"tantanbei.com/xdingdong"
 	"tantanbei.com/xjson"
 	"tantanbei.com/xstring"
+	"union/realapi/data/session"
 )
 
 type SignInUp struct {
@@ -322,6 +322,43 @@ func (self *Apn) ResetPassword(rw web.ResponseWriter, req *web.Request) {
 	session.DeleteSessionByUserId(userId)
 
 	okPacket.Code = 1
+	Success(rw)
+	rw.Write(xjson.Encode(okPacket))
+
+}
+
+func (self *Apn) CheckCookie(rw web.ResponseWriter, req *web.Request) {
+	okPacket := &packet.OkPacket{}
+
+	cookie, err := req.Cookie(HEADER_TOKEN)
+	if err != nil {
+		log.Error("read request error", err)
+		Fail(rw)
+		return
+	}
+	token,err := base64.URLEncoding.DecodeString(cookie.Value)
+	if err != nil {
+		log.Error("base64 DecodeString error", err)
+		Fail(rw)
+		return
+	}
+	if (cookie.Expires.Unix()  < time.Now().Unix()){
+		okPacket.Code = 0
+		okPacket.Message = "cookie expire"
+		Success(rw)
+		rw.Write(xjson.Encode(okPacket))
+		return
+	}
+	uid  := session.GetSessionByTokenId(token)
+	if uid <= 0 {
+		okPacket.Code = 0
+		okPacket.Message = "cookie invalid"
+		Success(rw)
+		rw.Write(xjson.Encode(okPacket))
+		return
+	}
+	okPacket.Code = 1
+	okPacket.Message = "success"
 	Success(rw)
 	rw.Write(xjson.Encode(okPacket))
 
