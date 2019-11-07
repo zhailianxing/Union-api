@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>历史数据</title>
+    <link href="/template/auction/pp.css" rel="stylesheet" type="text/css"/>
+    <link href="/template/auction/demo.css" rel="stylesheet" type="text/css"/>
+    <link href="/template/auction/select-css.css" rel="stylesheet" type="text/css"/>
+    <link href="/template/auction/select-css-campat.css" rel="stylesheet" type="text/css"/>
+
+    <script type="text/javascript" src="/template/echarts/echarts.js"></script>
+
+    <script type="application/javascript">
+
+        var selectType = 2;
+        var selectTypeName = ['投放额度','投标人数','最低成交价','平均成交价','警示价'];
+        var dates = new Array();
+        var limitations = new Array();
+        var peopleNumbers = new Array();
+        var minimumPrices = new Array();
+        var averagePrices = new Array();
+        var cautionPrices = new Array();
+
+        function selectTypeLinstener() {
+            var objS = document.getElementById("pid");
+            selectType = objS.selectedIndex;
+
+            show(selectType);
+        }
+
+        function sendRequest() {
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function () {
+                if (request.readyState == 4) {// 4 = "loaded"
+
+                    if (request.status == 200) {// 200 = OK
+                        // ...our code here...
+
+                        var succeed = request.getResponseHeader("succeed");
+                        if (succeed === "1") {
+                            var result = JSON.parse(request.responseText);
+                            var historyResults = result.auctionHistoryResults;
+
+                            for (var i = 0; i < historyResults.length; i++) {
+                                dates[i] = historyResults[i].date;
+                                limitations[i] = historyResults[i].limitation;
+                                peopleNumbers[i] = historyResults[i].peopleNumber;
+                                minimumPrices[i] = historyResults[i].minimumPrice;
+                                averagePrices[i] = historyResults[i].averagePrice;
+                                cautionPrices[i] = historyResults[i].cautionPrice;
+                            }
+
+                            show(selectType);
+                        }
+
+
+                    } else {
+                        alert("Problem retrieving XML data " + request.status);
+                    }
+                }
+            };
+
+            request.open("GET", '/apn/auction/history?request={"needDate":true,"needLimitation":true,"needPeopleNum":true,"needMinimumPrice":true,"needAveragePrice":true,"needCautionPrice":true}');
+            request.send();
+        }
+
+        function show(index) {
+            var data;
+
+            switch (index){
+                case 0:
+                    data = limitations;
+                    break;
+                case 1:
+                    data = peopleNumbers;
+                    break;
+                case 2:
+                    data = minimumPrices;
+                    break;
+                case 3:
+                    data = averagePrices;
+                    break;
+                case 4:
+                    data = cautionPrices;
+                    break;
+            }
+
+            option = {
+                tooltip: {
+                    trigger: 'axis',
+                },
+                legend: {
+                    data: [selectTypeName[index]]
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                toolbox: {
+                    feature: {
+                        saveAsImage: {}
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    data: dates
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                dataZoom:[
+                    {
+                        type: 'inside',
+                        xAxisIndex: [0],
+                        start: 0,
+                        end: dates.length
+                    }
+                ],
+                series: [
+                    {
+                        name: selectTypeName[index],
+                        type: 'line',
+                        data: data
+                    }
+                ]
+            };
+
+            if (option && typeof option === "object") {
+                myChart.setOption(option, true);
+            }
+        }
+    </script>
+</head>
+
+<body style="width: 100%;margin: 0;height: 100%">
+
+<div class="title_div" align="center">
+    <span class="title_name">历史数据</span>
+</div>
+
+<div class="button custom-select">
+    <select id="pid" onchange="selectTypeLinstener()">
+        <option value="limitation">投放额度</option>
+        <option value="peopleNumbers">投标人数</option>
+        <option value="minimumPrices" selected>最低成交价</option>
+        <option value="averagePrices">平均成交价</option>
+        <option value="cautionPrices">警示价</option>
+    </select>
+</div>
+<div id="container" style="height: 60%"></div>
+
+<script type="application/javascript">
+
+    var dom = document.getElementById("container");
+    var myChart = echarts.init(dom);
+
+    sendRequest();
+</script>
+
+</body>
+</html>

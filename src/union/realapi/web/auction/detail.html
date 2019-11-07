@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <title>详细价格变化</title>
+    <link href="/template/auction/pp.css" rel="stylesheet" type="text/css"/>
+    <link href="/template/auction/demo.css" rel="stylesheet" type="text/css"/>
+    <link href="/template/auction/select-css.css" rel="stylesheet" type="text/css"/>
+    <link href="/template/auction/select-css-campot.css" rel="stylesheet" type="text/css"/>
+
+    <script type="text/javascript" src="/template/echarts/echarts.js"></script>
+
+    <script type="application/javascript">
+
+        var dates = new Array();
+
+        function selectTypeLinstener() {
+            var objS = document.getElementById("pid");
+            getDetailData(dates[objS.selectedIndex]);
+
+        }
+
+        function sendRequest() {
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function () {
+                if (request.readyState == 4) {// 4 = "loaded"
+
+                    if (request.status == 200) {// 200 = OK
+                        // ...our code here...
+
+                        var succeed = request.getResponseHeader("succeed");
+                        if (succeed) {
+                            var result = JSON.parse(request.responseText);
+                            dates = result.Dates;
+                            var select = document.getElementById("pid");
+                            for (var i = 0; i < dates.length; i++) {
+                                var opt = document.createElement('option');
+                                opt.appendChild(document.createTextNode(dates[i]));
+                                select.appendChild(opt);
+                            }
+
+                            getDetailData(dates[0]);
+                        }
+                    } else {
+                        alert("Problem retrieving XML data " + request.status);
+                    }
+                }
+            };
+
+            request.open("GET", '/apn/auction/detail/dates');
+            request.send();
+        }
+
+        function getDetailData(date) {
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function () {
+                if (request.readyState == 4) {// 4 = "loaded"
+
+                    if (request.status == 200) {// 200 = OK
+                        // ...our code here...
+
+                        var succeed = request.getResponseHeader("succeed");
+                        if (succeed === "1") {
+                            var result = JSON.parse(request.responseText);
+                            var details = result.Details;
+
+                            var distance = new Array();
+                            var data = new Array();
+                            for (var i = 0; i < details.length; i++) {
+                                distance[i] = details[i].Distance;
+                                data[i] = details[i].Price;
+                            }
+
+                            show(date, distance, data)
+                        }
+                    } else {
+                        alert("Problem retrieving XML data " + request.status);
+                    }
+                }
+            };
+
+            request.open("GET", '/apn/auction/detail?date=' + date);
+            request.send();
+        }
+
+        function show(date, distance, data) {
+
+            option = {
+                tooltip: {
+                    trigger: 'axis',
+                },
+                legend: {
+                    data: [date]
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                toolbox: {
+                    feature: {
+                        saveAsImage: {}
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    data: distance
+                },
+                yAxis: {
+                    type: 'value',
+                    min: data[0] - 100,
+                },
+                dataZoom: [
+                    {
+                        type: 'inside',
+                        xAxisIndex: [0],
+                        start: 0,
+                        end: distance.length * 2
+                    }
+                ],
+                series: [
+                    {
+                        name: date,
+                        type: 'line',
+                        step: 'start',
+                        data: data
+                    }
+                ]
+            };
+
+            if (option && typeof option === "object") {
+                myChart.setOption(option, true);
+            }
+        }
+    </script>
+</head>
+
+<body style="width: 100%;margin: 0;height: 100%">
+
+<div class="title_div" align="center">
+    <span class="title_name">详细价格变化</span>
+</div>
+
+<div class="button custom-select">
+    <select id="pid" onchange="selectTypeLinstener()"></select>
+</div>
+<div id="container" style="height: 60%"></div>
+
+<script type="application/javascript">
+
+    var dom = document.getElementById("container");
+    var myChart = echarts.init(dom);
+
+    sendRequest();
+</script>
+
+</body>
+</html>

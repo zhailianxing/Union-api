@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <title>拍牌宝</title>
+    <link href="/template/auction/pp.css" rel="stylesheet" type="text/css"/>
+    <link href="/template/auction/gh-buttons.css" rel="stylesheet" type="text/css"/>
+
+    <script type="application/javascript">
+        var strategyType = 0;
+
+        function sendRequest() {
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function () {
+                if (request.readyState == 4) {// 4 = "loaded"
+
+                    if (request.status == 200) {// 200 = OK
+                        // ...our code here...
+
+                        var result = JSON.parse(request.responseText);
+
+                        switch (result.Style) {
+                            case 0:
+                                document.getElementById("second_30").innerHTML = result.Second30;
+                                document.getElementById("second_40").innerHTML = result.Second40;
+                                document.getElementById("second_45").innerHTML = result.Second45;
+                                document.getElementById("second_50").innerHTML = result.Second50;
+
+                                setTimeout('sendRequest()', 300);
+                                break;
+                            case 1:
+                                alert("auction is not started!");
+                                break;
+                            case 2:
+                                alert("auction is over!");
+                                break;
+                            default:
+                                alert("unknown error!");
+                                break;
+                        }
+                    } else {
+                        alert("Problem retrieving XML data " + request.status);
+                    }
+                }
+            };
+
+            request.open("GET", "/apn/auction/strategy?type=" + strategyType);
+            request.send("");
+        }
+
+        function frequencyStrategyClick() {
+            strategyType = 0;
+            document.getElementById("strategy_name").innerHTML = "激进策略";
+        }
+
+        function averageStrategyClick() {
+            strategyType = 1;
+            document.getElementById("strategy_name").innerHTML = "普通策略";
+        }
+
+    </script>
+
+</head>
+
+<body style="text-align: center">
+
+<div class="title_div" align="center">
+    <span class="title_name">拍牌宝</span>
+</div>
+
+<div class="wrap">
+
+    <div class="button-group">
+        <button class="button primary" id="frequency_strategy" onclick="frequencyStrategyClick()">激进策略</button>
+        <button class="button" id="average_strategy" onclick="averageStrategyClick()">普通策略</button>
+    </div>
+
+    <div class="strategy_div">
+        <span id="strategy_name" class="strategy_name">激进策略</span>
+    </div>
+
+    <div class="second_div">
+        <span class="second">30s:</span>
+        <span id="second_30" class="second">00000</span>
+    </div>
+    <div class="second_div">
+        <span class="second">40s:</span>
+        <span id="second_40" class="second">00000</span>
+    </div>
+    <div class="second_div">
+        <span class="second">45s:</span>
+        <span id="second_45" class="second">00000</span>
+    </div>
+    <div class="second_div">
+        <span class="second">50s:</span>
+        <span id="second_50" class="second">00000</span>
+    </div>
+
+</div> <!--wrap结束-->
+
+<script type="application/javascript">
+
+    sendRequest();
+</script>
+
+</body>
+</html>

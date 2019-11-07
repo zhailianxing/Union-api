@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <title>编辑</title>
+
+    <script type="text/javascript" src="/template/const.js"></script>
+
+    <!--引入wangEditor.css-->
+    <link rel="stylesheet" type="text/css" href="/template/wangEditor/css/wangEditor.min.css">
+    <!--引入jquery和wangEditor.js-->   <!--注意：javascript必须放在body最后，否则可能会出现问题-->
+    <script type="text/javascript" src="/template/wangEditor/js/lib/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="/template/wangEditor/js/wangEditor.min.js"></script>
+
+    <script type="text/javascript">
+        var editor;
+
+        function send() {
+            var password = document.getElementById("password").value;
+
+            var request = new XMLHttpRequest();
+
+            request.onreadystatechange = function () {
+                if (request.readyState == 4) {// 4 = "loaded"
+
+                    if (request.status == 200) {// 200 = OK
+                        // ...our code here...
+
+                        var succeed = request.getResponseHeader("succeed");
+                        if (succeed === "1") {
+                            alert("提交成功")
+                        } else {
+                            alert("提交失败")
+                        }
+                    } else {
+                        alert("Problem retrieving XML data " + request.status);
+                    }
+                }
+            };
+
+            request.open("POST", "/apn/document/addupdate");
+            request.setRequestHeader("document_password", password);
+
+            var docId = QueryString.docid;
+            if (docId == null || docId.length == 0) {
+                docId = 0;
+            }else {
+                docId = Number(docId);
+            }
+
+            var sendData = JSON.stringify({
+                DocId: docId,
+                Title: document.getElementById("title").value,
+                Content: editor.$txt.html()
+            });
+            request.send(sendData);
+        }
+
+        function getDocContent() {
+            var docId = QueryString.docid;
+            console.log(docId);
+            if (docId == null || docId.length == 0) {
+                return
+            }
+
+            var request = new XMLHttpRequest();
+
+            request.onreadystatechange = function () {
+                if (request.readyState == 4) {// 4 = "loaded"
+
+                    if (request.status == 200) {// 200 = OK
+                        // ...our code here...
+
+                        var succeed = request.getResponseHeader("succeed");
+                        if (succeed === "1") {
+                            var result = JSON.parse(request.responseText);
+                            console.log(result);
+                            document.getElementById("title").value = result.Title;
+                            editor.$txt.html(result.Content);
+
+                        } else {
+                            alert("提交失败")
+                        }
+                    } else {
+                        alert("Problem retrieving XML data " + request.status);
+                    }
+                }
+            };
+
+            request.open("GET", "/apn/document/get?docid=" + docId);
+            request.send("");
+        }
+
+    </script>
+</head>
+<body>
+
+<div>
+    标题：
+    <input id="title" type="text" style="padding: 1em;margin: 1em;width: 70%">
+</div>
+
+<div id="div1" style="height: 500px">
+    <p>请输入内容...</p>
+</div>
+
+<div>
+    秘钥：
+    <input id="password" type="text" style="padding: 1em;margin: 1em">
+</div>
+
+<div>
+    <button id="submit" style="padding: 1em;margin: 1em" onclick="send()">提交</button>
+</div>
+
+<!--这里引用jquery和wangEditor.js-->
+<script type="text/javascript">
+    editor = new wangEditor('div1');
+    editor.config.uploadImgUrl = "../apn/image/add/editor";
+    editor.create();
+
+    getDocContent();
+
+</script>
+
+</body>
+</html>

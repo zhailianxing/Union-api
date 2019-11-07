@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <link href="/template/auction/demo.css" rel="stylesheet" type="text/css"/>
+    <link href="/template/auction/select-css.css" rel="stylesheet" type="text/css"/>
+    <link href="/template/auction/select-css-compat.css" rel="stylesheet" type="text/css"/>
+    <title>新建文章</title>
+
+    <script type="text/javascript" src="/template/const.js"></script>
+
+    <script type="application/javascript">
+        var requestCount = 0;
+
+        function sendRequest() {
+            var requestCategory = new XMLHttpRequest();
+            requestCategory.onreadystatechange = function () {
+                if (requestCategory.readyState == 4) {// 4 = "loaded"
+
+                    if (requestCategory.status == 200) {// 200 = OK
+                        // ...our code here...
+
+                        var succeed = requestCategory.getResponseHeader("succeed");
+                        if (succeed) {
+                            var result = JSON.parse(requestCategory.responseText);
+                            data = result.Data;
+                            var select = document.getElementById("categories");
+                            var optFirst = document.createElement('option');
+                            optFirst.appendChild(document.createTextNode("类型"));
+                            optFirst.value = 0;
+                            select.appendChild(optFirst);
+
+                            for (var i = 0; i < data.length; i++) {
+                                var opt = document.createElement('option');
+                                opt.appendChild(document.createTextNode(data[i].CategoryText));
+                                opt.value = data[i].CategoryId;
+                                select.appendChild(opt);
+                            }
+
+                            if (--requestCount === 0) {
+                                updateContent();
+                            }
+                        }
+                    } else {
+                        alert("Problem retrieving XML data " + requestCategory.status);
+                    }
+                }
+            };
+
+            requestCategory.open("GET", '/apn/category');
+            requestCategory.send();
+            requestCount++;
+
+            var requestKeyword = new XMLHttpRequest();
+            requestKeyword.onreadystatechange = function () {
+                if (requestKeyword.readyState == 4) {// 4 = "loaded"
+
+                    if (requestKeyword.status == 200) {// 200 = OK
+                        // ...our code here...
+
+                        var succeed = requestKeyword.getResponseHeader("succeed");
+                        if (succeed) {
+                            var result = JSON.parse(requestKeyword.responseText);
+                            data = result.Data;
+                            var select1 = document.getElementById("keywords1");
+                            var select2 = document.getElementById("keywords2");
+                            var select3 = document.getElementById("keywords3");
+                            var select4 = document.getElementById("keywords4");
+
+                            var optFirst = document.createElement('option');
+                            optFirst.appendChild(document.createTextNode("关键字"));
+                            optFirst.value = 0;
+                            select1.appendChild(optFirst.cloneNode(true));
+                            select2.appendChild(optFirst.cloneNode(true));
+                            select3.appendChild(optFirst.cloneNode(true));
+                            select4.appendChild(optFirst.cloneNode(true));
+
+                            for (var i = 0; i < data.length; i++) {
+                                var opt = document.createElement('option');
+                                opt.appendChild(document.createTextNode(data[i].KeywordText));
+                                opt.value = data[i].KeywordId;
+                                select1.appendChild(opt.cloneNode(true));
+                                select2.appendChild(opt.cloneNode(true));
+                                select3.appendChild(opt.cloneNode(true));
+                                select4.appendChild(opt.cloneNode(true));
+                            }
+                            if (--requestCount === 0) {
+                                updateContent();
+                            }
+                        }
+                    } else {
+                        alert("Problem retrieving XML data " + requestKeyword.status);
+                    }
+                }
+            };
+
+            requestKeyword.open("GET", '/apn/keyword');
+            requestKeyword.send();
+            requestCount++;
+
+            var requestReprint = new XMLHttpRequest();
+            requestReprint.onreadystatechange = function () {
+                if (requestReprint.readyState == 4) {// 4 = "loaded"
+
+                    if (requestReprint.status == 200) {// 200 = OK
+                        // ...our code here...
+
+                        var succeed = requestReprint.getResponseHeader("succeed");
+                        if (succeed) {
+                            var result = JSON.parse(requestReprint.responseText);
+                            data = result.Data;
+                            var select = document.getElementById("reprints");
+                            var optFirst = document.createElement('option');
+                            optFirst.appendChild(document.createTextNode("转载来源"));
+                            optFirst.value = 0;
+                            select.appendChild(optFirst);
+
+                            for (var i = 0; i < data.length; i++) {
+                                var opt = document.createElement('option');
+                                opt.appendChild(document.createTextNode(data[i].SourceText));
+                                opt.value = data[i].SourceId;
+                                select.appendChild(opt);
+                            }
+
+                            if (--requestCount === 0) {
+                                updateContent();
+                            }
+                        }
+                    } else {
+                        alert("Problem retrieving XML data " + requestReprint.status);
+                    }
+                }
+            };
+
+            requestReprint.open("GET", '/apn/reprint');
+            requestReprint.send();
+            requestCount++;
+
+            var requestDocument = new XMLHttpRequest();
+            requestDocument.onreadystatechange = function () {
+                if (requestDocument.readyState == 4) {// 4 = "loaded"
+
+                    if (requestDocument.status == 200) {// 200 = OK
+                        // ...our code here...
+
+                        var succeed = requestDocument.getResponseHeader("succeed");
+                        if (succeed) {
+                            var result = JSON.parse(requestDocument.responseText);
+                            data = result.Data;
+
+                            var selectDoc = document.getElementById("document");
+                            var optFirst = document.createElement('option');
+                            optFirst.appendChild(document.createTextNode("文档"));
+                            optFirst.value = 0;
+                            selectDoc.appendChild(optFirst);
+
+                            for (var i = 0; i < data.length; i++) {
+                                var opt = document.createElement('option');
+                                opt.appendChild(document.createTextNode(data[i].Title));
+                                opt.value = data[i].DocId;
+                                selectDoc.appendChild(opt);
+                            }
+
+                            if (--requestCount === 0) {
+                                updateContent();
+                            }
+                        }
+                    } else {
+                        alert("Problem retrieving XML data " + requestDocument.status);
+                    }
+                }
+            };
+
+            requestDocument.open("GET", '/apn/document');
+            requestDocument.send();
+            requestCount++;
+        }
+
+        function updateContent() {
+            var paperId = QueryString.paperid;
+            console.log(paperId);
+            if (paperId == null || paperId.length == 0) {
+                return
+            }
+
+            var requestContent = new XMLHttpRequest();
+            requestContent.onreadystatechange = function () {
+                if (requestContent.readyState == 4) {// 4 = "loaded"
+
+                    if (requestContent.status == 200) {// 200 = OK
+                        // ...our code here...
+
+                        var succeed = requestContent.getResponseHeader("succeed");
+                        if (succeed) {
+                            var result = JSON.parse(requestContent.responseText);
+                            console.log(result);
+                            document.getElementById("title").value = result.Title;
+
+                            if (result.ImageId != 0) {
+                                var cover = document.getElementById("cover");
+                                cover.src = "/apn/image/get?imageid=" + result.ImageId + "&imagetype=0"
+                            }
+
+                            var category = document.getElementById("categories");
+                            for (var i = 0; i < category.options.length; i++) {
+                                if (result.CategoryId == Number(category.options[i].value)) {
+                                    category.options[i].selected = true;
+                                    break;
+                                }
+                            }
+
+                            var keyword1 = document.getElementById("keywords1");
+                            for (var i = 0; i < keyword1.options.length; i++) {
+                                if (result.KeywordId1 == Number(keyword1.options[i].value)) {
+                                    keyword1.options[i].selected = true;
+                                    break;
+                                }
+                            }
+
+                            var keyword2 = document.getElementById("keywords2");
+                            for (var i = 0; i < keyword2.options.length; i++) {
+                                if (result.KeywordId2 == Number(keyword2.options[i].value)) {
+                                    keyword2.options[i].selected = true;
+                                    break;
+                                }
+                            }
+
+                            var keyword3 = document.getElementById("keywords3");
+                            for (var i = 0; i < keyword3.options.length; i++) {
+                                if (result.KeywordId3 == Number(keyword3.options[i].value)) {
+                                    keyword3.options[i].selected = true;
+                                    break;
+                                }
+                            }
+
+                            var keyword4 = document.getElementById("keywords4");
+                            for (var i = 0; i < keyword4.options.length; i++) {
+                                if (result.KeywordId4 == Number(keyword4.options[i].value)) {
+                                    keyword4.options[i].selected = true;
+                                    break;
+                                }
+                            }
+
+                            var reprint = document.getElementById("reprints");
+                            for (var i = 0; i < reprint.options.length; i++) {
+                                if (result.ReprintId == Number(reprint.options[i].value)) {
+                                    reprint.options[i].selected = true;
+                                    break;
+                                }
+                            }
+                        } else {
+                            alert("Problem retrieving XML data " + requestContent.status);
+                        }
+                    }
+                }
+            };
+            requestContent.open("GET", '/apn/paper/get?paperid=' + paperId);
+            requestContent.send();
+        }
+
+        function send() {
+            var paperId = QueryString.paperid;
+            if (paperId == null || paperId.length == 0) {
+                paperId = 0;
+            } else {
+                paperId = Number(paperId);
+            }
+
+            var title = document.getElementById("title");
+            if (title.value == null || title.value.trim() === "") {
+                alert("标题未填写");
+                return
+            }
+
+            var category = document.getElementById("categories");
+            if (category.selectedIndex == 0) {
+                alert("文章类型未选择");
+                return
+            }
+
+            var keywords1 = document.getElementById("keywords1");
+            var keywords2 = document.getElementById("keywords2");
+            var keywords3 = document.getElementById("keywords3");
+            var keywords4 = document.getElementById("keywords4");
+            if (keywords1.selectedIndex == 0 &&
+                keywords2.selectedIndex == 0 &&
+                keywords3.selectedIndex == 0 &&
+                keywords4.selectedIndex == 0) {
+                alert("关键字未选择");
+                return
+            }
+
+            var reprint = document.getElementById("reprints");
+            if (category.selectedIndex == 7 && reprint.selectedIndex == 0) {
+                alert("未指定转载来源");
+                return
+            }
+
+            var doc = document.getElementById("document");
+            //if we not update the paper, the docid do not an empty...
+            if (doc.selectedIndex == 0 && paperId == 0) {
+                alert("文档文件未选择");
+                return
+            }
+
+            var sendData = JSON.stringify({
+                PaperId: paperId,
+                Title: title.value,
+                CategoryId: Number(category.options[category.selectedIndex].value),
+                KeywordId1: Number(keywords1.options[keywords1.selectedIndex].value),
+                KeywordId2: Number(keywords1.options[keywords2.selectedIndex].value),
+                KeywordId3: Number(keywords1.options[keywords3.selectedIndex].value),
+                KeywordId4: Number(keywords1.options[keywords4.selectedIndex].value),
+                ReprintId: Number(reprint.options[reprint.selectedIndex].value),
+                DocId: Number(doc.options[doc.selectedIndex].value)
+            });
+
+            var requestCreatePaper = new XMLHttpRequest();
+            requestCreatePaper.onreadystatechange = function () {
+                if (requestCreatePaper.readyState == 4) {// 4 = "loaded"
+
+                    if (requestCreatePaper.status == 200) {// 200 = OK
+                        // ...our code here...
+
+                        var succeed = requestCreatePaper.getResponseHeader("succeed");
+                        if (succeed === "1") {
+                            alert("提交成功");
+                        } else {
+                            alert("提交失败")
+                        }
+                    } else {
+                        alert("Problem retrieving XML data " + requestCreatePaper.status);
+                    }
+                }
+            };
+
+            requestCreatePaper.open("POST", '/apn/paper/newupdate');
+            requestCreatePaper.setRequestHeader("paper_password", document.getElementById("password").value);
+            requestCreatePaper.send(sendData);
+        }
+
+        function submitImage(files) {
+            if (files.length) {
+                file = files[0];
+
+                var reader = new FileReader();
+
+                reader.onload = function () {
+
+                    var requestCover = new XMLHttpRequest();
+                    requestCover.onreadystatechange = function () {
+                        if (requestCover.readyState == 4) {// 4 = "loaded"
+
+                            if (requestCover.status == 200) {// 200 = OK
+                                // ...our code here...
+
+                                var succeed = requestCover.getResponseHeader("succeed");
+                                if (succeed === "1") {
+                                    var result = JSON.parse(requestCover.responseText);
+
+                                    document.getElementById("cover").src = "/apn/image/get?imageid=" + result.ImageId + "&imagetype=1";
+                                    console.log(document.getElementById("cover").src);
+                                    alert("封面上传成功")
+                                } else {
+                                    alert("封面上传失败")
+                                }
+                            } else {
+                                alert("Problem retrieving XML data " + requestCover.status);
+                            }
+                        }
+                    };
+
+                    requestCover.open("POST", '/apn/image/add');
+                    requestCover.send(reader.result);
+                };
+
+                reader.readAsArrayBuffer(file);
+            }
+
+        }
+    </script>
+</head>
+<body>
+<div>
+    标题：
+    <input id="title" type="text" style="padding: 1em;margin: 1em;width: 70%">
+</div>
+
+<h4>封面：</h4>
+<div>
+    <input id="choose_image" type="file" accept="image/jpeg,image/png,image/webp" onchange="submitImage(this.files)">
+</div>
+<div>
+    <img id="cover" width="240" height="180">
+</div>
+
+<h4>文章类型：</h4>
+<div class="button custom-select">
+    <select id="categories"></select>
+</div>
+
+<h4>文章关键字：</h4>
+<div class="button custom-select">
+    <select id="keywords1"></select>
+</div>
+<div class="button custom-select">
+    <select id="keywords2"></select>
+</div>
+<div class="button custom-select">
+    <select id="keywords3"></select>
+</div>
+<div class="button custom-select">
+    <select id="keywords4"></select>
+</div>
+
+<h4>文章类型：</h4>
+<div class="button custom-select">
+    <select id="reprints"></select>
+</div>
+
+<h4>选择文档：</h4>
+<div>在新建文章时，请选择您所编辑的文档</div>
+<div>在更新文章时，如不需要修改内容，则不需要选择文档</div>
+<div class="button custom-select">
+    <select id="document"></select>
+</div>
+
+<div>
+    秘钥：
+    <input id="password" type="text" style="padding: 1em;margin: 1em">
+</div>
+
+<div>
+    <button id="submit" style="padding: 1em;margin: 1em" onclick="send()">提交</button>
+</div>
+
+<script type="application/javascript">
+    sendRequest();
+</script>
+</body>
+</html>

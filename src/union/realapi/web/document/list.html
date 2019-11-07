@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <title>文档列表</title>
+
+    <script type="text/javascript" src="/template/const.js"></script>
+
+    <style type="text/css">
+        h4 {
+            font-size: 14px;
+            color: #333;
+        }
+
+        a {
+            color: #069;
+        }
+
+        dl {
+            border: dashed 1px #666;
+            font-size: 14px;
+            padding: 4px;
+            background: #FDFBDB;
+        }
+
+        dt {
+            clear: left;
+            float: left;
+            font-size: 12px;
+            padding: 4px 0;
+            height: 20px;
+        }
+
+        dd {
+            text-align: right;
+            padding: 4px 0;
+            font-size: 12px;
+            color: #666;
+            height: 20px;
+        }
+    </style>
+
+    <script type="application/javascript">
+
+        function refreshData() {
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function () {
+                if (request.readyState == 4) {// 4 = "loaded"
+
+                    if (request.status == 200) {// 200 = OK
+                        // ...our code here...
+
+                        var succeed = request.getResponseHeader("succeed");
+                        if (succeed === "1") {
+                            var result = JSON.parse(request.responseText);
+                            documents = result.Data;
+
+                            var list = document.getElementById("list");
+
+                            for (var i = 0; i < documents.length; i++) {
+                                var dt = document.createElement("dt");
+                                var dd = document.createElement("dd");
+                                var a = document.createElement("a");
+
+                                a.href = "/web/editor?docid=" + documents[i].DocId;
+                                a.innerHTML = documents[i].Title;
+                                dt.appendChild(a);
+
+                                var date = new Date();
+                                date.setTime(documents[i].DateSubmit * 1000);
+                                dd.innerHTML = date.toLocaleString();
+
+                                list.appendChild(dt);
+                                list.appendChild(dd);
+                            }
+                        }
+                    } else {
+                        alert("Problem retrieving XML data " + request.status);
+                    }
+                }
+            };
+
+            request.open("GET", '/apn/document');
+            request.send();
+        }
+    </script>
+
+</head>
+<body>
+<h4>文档列表</h4>
+<a href="/web/editor">新建文档</a>
+<dl id="list">
+</dl>
+<script type="application/javascript">
+    refreshData();
+</script>
+</body>
+</html>
